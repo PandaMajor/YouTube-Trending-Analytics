@@ -1,7 +1,6 @@
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
-import colorcet as cc
 import json
 from bokeh.models import ColumnDataSource
 from bokeh.plotting import figure, output_file, show
@@ -34,10 +33,14 @@ df['category'] = df['categoryId'].apply(lambda x: convertID(x))
 
 fig_dims = (16, 9)                                          # create bigger graph
 fig, ax = plt.subplots(figsize=fig_dims)
-sns.scatterplot(x='trending_date', y='view_count', data=df, palette='pastel', hue='category', ax=ax).set_title('views over time')
-plt.show()
 
-sns.scatterplot(x='likes', y='dislikes', data=df, palette='flare', hue='view_count', ax=ax).set_title('likes/dislikes ratio')
+#sns.scatterplot(x='trending_date', y='view_count', data=df, palette='pastel', hue='category', ax=ax).set_title('views over time')
+#plt.show()
+
+#sns.scatterplot(x='likes', y='dislikes', data=df, palette='flare', hue='view_count', ax=ax).set_title('likes/dislikes ratio')
+#plt.show()
+
+sns.regplot(x='likes', y='dislikes', data=df, ax=ax).set_title('likes/dislikes linear fit')
 plt.show()
 
 count = pd.DataFrame(translation, index=['category', 'count'])
@@ -62,12 +65,16 @@ print(count.index)
 output_file("categories.html")
 source = ColumnDataSource(data=dict(categories=count['category'], total=count['count']))
 
-p = figure(x_range=count['category'], plot_width=1520, plot_height=855, title="Youtube Trending Categories")
+# define custom color palette
+colors = ('#53b3cb', '#7db7a4', '#a6bb7d', '#f9c22e', '#f7a834', '#f58e3a',
+          '#f15946', '#ed4a49', '#e93a4b', '#e01a4f', '#ab163f', '#76122e', '#410e1e', '#270c16', '#0c090d')
+
+p = figure(x_range=count['category'], plot_width=1600, plot_height=900, title="Youtube Trending Categories")
 p.vbar(x='categories', top='total', width=1, source=source, legend_field='categories', line_color='white',
-       fill_color=factor_cmap('categories', palette=cc.b_glasbey_hv, factors=count['category']))
+       fill_color=factor_cmap('categories', palette=colors, factors=count['category']))
 
 p.xgrid.grid_line_color = None
-p.legend.orientation = 'horizontal'
-p.legend.location = 'top_center'
+p.legend.orientation = 'vertical'
+p.legend.location = 'top_right'
 p.y_range.start = 0
 show(p)
